@@ -8,14 +8,17 @@ def idle(connection):
     tag = connection._new_tag()
     connection.send("%s IDLE\r\n" % tag)
     response = connection.readline()
-    connection.loop = True
-    if response == '+ idling\r\n':
-        while connection.loop:
-            resp = connection.readline()
-            uid, message = resp[2:-2].split(' ')
-            yield uid, message
-    else:
+    if response != '+ idling\r\n':
         raise Exception("IDLE not handled? : %s" % response)
+    connection.loop = True
+    while connection.loop:
+        try:
+            resp = connection._get_response()
+        except connection.abort:
+            connection.done()
+        else:
+            uid, message = resp.split()[1:]
+            yield uid, message
 
 
 def done(connection):

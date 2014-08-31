@@ -24,7 +24,7 @@ def idle(connection):
 
 
 def done(connection):
-    connection.send("DONE\r\n")
+    connection.send(b'DONE\r\n')
     connection.loop = False
 
 imaplib.IMAP4.idle = idle

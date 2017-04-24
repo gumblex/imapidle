@@ -20,11 +20,17 @@ def idle(connection):
             connection.done()
         else:
             uid, message = resp.split(maxsplit=2)[1:]
-            yield uid, message
+            if uid.isdigit():
+                yield uid, message
+            elif uid != b'OK':
+                raise imaplib.error(
+                    'IDLE command error: %s %s' % (uid.decode(), message))
+            # we have * OK still here
 
 
 def done(connection):
     connection.send(b'DONE\r\n')
+    response = connection.readline()
     connection.loop = False
 
 imaplib.IMAP4.idle = idle
